@@ -1,16 +1,14 @@
 package components;
 
-import com.vaadin.event.LayoutEvents.LayoutClickEvent;
-import com.vaadin.event.LayoutEvents.LayoutClickListener;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -18,6 +16,7 @@ import pojos.Shop;
 import pojos.User;
 import views.AllegroProfileInfoView;
 import views.AllegroUserInfoView;
+import views.CategoriesView;
 import views.DashboardView;
 import views.LoginView;
 import views.UserAuctionsView;
@@ -33,25 +32,19 @@ public class MyMenuBar extends HorizontalLayout {
 		this.setMargin(false);
 		this.setStyleName(ValoTheme.MENU_TITLE);
 
-		VerticalLayout titleLayout = new VerticalLayout();
-		titleLayout.setSizeUndefined();
-		titleLayout.setMargin(false);
-		titleLayout.setSpacing(true);
-		this.addComponent(titleLayout);
-
-		titleLayout.addLayoutClickListener(new LayoutClickListener() {
+		Button titleButton = new Button("TradeLyzer");
+		titleButton.setSizeUndefined();
+		titleButton.addStyleName(ValoTheme.BUTTON_BORDERLESS);
+		titleButton.addStyleName(ValoTheme.BUTTON_HUGE);
+		titleButton.addClickListener(new Button.ClickListener() {
 
 			@Override
-			public void layoutClick(LayoutClickEvent event) {
+			public void buttonClick(ClickEvent event) {
 				UI.getCurrent().getNavigator().navigateTo(DashboardView.NAME);
 			}
-
 		});
-
-		Label title = new Label("<h2>Trade<strong>Lyzer</strong></h2>", ContentMode.HTML);
-		title.setSizeUndefined();
-		titleLayout.addComponent(title);
-		titleLayout.setComponentAlignment(title, Alignment.MIDDLE_CENTER);
+		this.addComponent(titleButton);
+		this.setComponentAlignment(titleButton, Alignment.MIDDLE_LEFT);
 
 		Label expandingGap = new Label();
 		expandingGap.setSizeFull();
@@ -60,6 +53,7 @@ public class MyMenuBar extends HorizontalLayout {
 		MenuBar publicMenu = new MenuBar();
 		publicMenu.setSizeUndefined();
 		this.addComponent(publicMenu);
+		this.setComponentAlignment(publicMenu, Alignment.MIDDLE_CENTER);
 
 		publicMenu.addItem("Sprzedawcy", VaadinIcons.GROUP, new MenuBar.Command() {
 
@@ -79,17 +73,7 @@ public class MyMenuBar extends HorizontalLayout {
 
 		});
 
-		 publicMenu.addItem("Słowa kluczowe", VaadinIcons.SEARCH, new
-		 MenuBar.Command() {
-		
-		 @Override
-		 public void menuSelected(MenuItem selectedItem) {
-		
-		 }
-		
-		 });
-
-		publicMenu.addItem("Kategorie", VaadinIcons.SLIDERS, new MenuBar.Command() {
+		publicMenu.addItem("Słowa kluczowe", VaadinIcons.SEARCH, new MenuBar.Command() {
 
 			@Override
 			public void menuSelected(MenuItem selectedItem) {
@@ -98,9 +82,19 @@ public class MyMenuBar extends HorizontalLayout {
 
 		});
 
+		publicMenu.addItem("Kategorie", VaadinIcons.SLIDERS, new MenuBar.Command() {
+
+			@Override
+			public void menuSelected(MenuItem selectedItem) {
+				UI.getCurrent().getNavigator().navigateTo(CategoriesView.NAME);
+			}
+
+		});
+
 		MenuBar userMenu = new MenuBar();
 		userMenu.setSizeUndefined();
 		this.addComponent(userMenu);
+		this.setComponentAlignment(userMenu, Alignment.MIDDLE_CENTER);
 
 		userMenuItem = userMenu.addItem("Login", VaadinIcons.USER, new MenuBar.Command() {
 
@@ -116,6 +110,7 @@ public class MyMenuBar extends HorizontalLayout {
 		allegroUserMenu.setSizeUndefined();
 		allegroUserMenu.setVisible(false);
 		this.addComponent(allegroUserMenu);
+		this.setComponentAlignment(allegroUserMenu, Alignment.MIDDLE_CENTER);
 
 		allegroUserMenuItem = allegroUserMenu.addItem("Login to allegro", VaadinIcons.SHOP, new MenuBar.Command() {
 

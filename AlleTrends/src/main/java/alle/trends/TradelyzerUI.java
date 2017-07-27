@@ -3,7 +3,6 @@ package alle.trends;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
@@ -28,16 +27,17 @@ import com.vaadin.ui.Panel;
 
 @SuppressWarnings("serial")
 @SpringUI
-@Theme("mytheme")
+@Theme("valo")
 public class TradelyzerUI extends UI {
 
-	private Navigator navi;
 	private VerticalLayout root;
 	private Panel viewContainer;
 	public MyMenuBar menuBar;
 
 	@Autowired
-	private SpringViewProvider viewProvider;
+	SpringViewProvider viewProvider;
+	@Autowired
+	private SpringNavigator navi;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -87,8 +87,7 @@ public class TradelyzerUI extends UI {
 	}
 
 	private void addNavigator() {
-		navi = new Navigator(this, viewContainer);
-		navi.addProvider(viewProvider);
+		navi.init(this, viewContainer);
 
 		UI.getCurrent().setNavigator(navi);
 

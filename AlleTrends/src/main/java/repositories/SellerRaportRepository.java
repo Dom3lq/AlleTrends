@@ -11,4 +11,9 @@ import pojos.SellerRaport;
 public interface SellerRaportRepository extends JpaRepository<SellerRaport, Integer> {
 
 	SellerRaport findOneBySellerAndCategoryRaport(Seller seller, CategoryRaport categoryRaport);
+
+	long countByCategoryRaport(CategoryRaport categoryRaport);
+
+	SellerRaport findFirstBySellerAndCategoryRaportCategoryParentIdOrderByCategoryRaport_Raport_TimeDesc(Seller seller,
+			int i);
 }

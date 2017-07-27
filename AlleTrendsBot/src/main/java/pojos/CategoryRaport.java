@@ -99,11 +99,11 @@ public class CategoryRaport extends Statistics {
 	}
 
 	public List<ParameterValueRaport> getParameterValueRaport() {
-		return parameterValueRaports;
+		return getParameterValueRaports();
 	}
 
 	public void setParameterValueRaport(List<ParameterValueRaport> parameterValueRaports) {
-		this.parameterValueRaports = parameterValueRaports;
+		this.setParameterValueRaports(parameterValueRaports);
 	}
 
 	public List<CategoryFailedPortion> getCategoryFailedPortions() {
@@ -114,4 +114,31 @@ public class CategoryRaport extends Statistics {
 		this.categoryFailedPortions = categoryFailedPortions;
 	}
 
+	public List<KeywordRaport> getKeywordRaports() {
+		return keywordRaports;
+	}
+
+	public void setKeywordRaports(List<KeywordRaport> keywordRaports) {
+		this.keywordRaports = keywordRaports;
+	}
+
+	public List<SellerRaport> getSellerRaports() {
+		return sellerRaports;
+	}
+
+	public void setSellerRaports(List<SellerRaport> sellerRaports) {
+		this.sellerRaports = sellerRaports;
+	}
+
+	public List<ParameterValueRaport> getParameterValueRaports() {
+		return parameterValueRaports;
+	}
+
+	public void setParameterValueRaports(List<ParameterValueRaport> parameterValueRaports) {
+		this.parameterValueRaports = parameterValueRaports;
+	}
+
+	public void incrementBy(CategoryRaport categoryRaport) {
+		this.getAllStatistics().incrementBy(categoryRaport.getAllStatistics());
+	}
 }

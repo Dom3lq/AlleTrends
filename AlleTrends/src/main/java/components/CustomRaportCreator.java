@@ -186,9 +186,9 @@ public class CustomRaportCreator extends Panel {
 		buttonLayout.setMargin(true);
 		content.addComponent(buttonLayout);
 
-		Button removeB = new Button("Dodaj");
+		Button removeB = new Button("Usuń");
 		removeB.setSizeUndefined();
-		removeB.addStyleName(ValoTheme.BUTTON_FRIENDLY);
+		removeB.addStyleName(ValoTheme.BUTTON_DANGER);
 		removeB.setIcon(VaadinIcons.PLUS_CIRCLE);
 		removeB.addClickListener(new Button.ClickListener() {
 

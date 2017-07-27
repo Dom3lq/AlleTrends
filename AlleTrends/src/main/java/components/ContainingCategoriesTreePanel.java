@@ -2,6 +2,6 @@ package components;
 
 import pojos.Category;
 
-public interface ContainingCategory {
+public interface ContainingCategoriesTreePanel {
 	public void selectCategory(Category cat);
 }

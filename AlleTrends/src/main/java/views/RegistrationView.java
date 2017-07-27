@@ -8,14 +8,11 @@ import java.security.SecureRandom;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;

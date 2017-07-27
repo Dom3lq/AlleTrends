@@ -10,7 +10,7 @@ import pojos.Raport;
 @Repository
 public interface RaportRepository extends JpaRepository<Raport, Long> {
 
-	List<Raport> findAllByOrderByTimeDesc();
+	List<Raport> findByIsCompleteTrueOrderByTimeDesc();
 
 	Raport findFirstByIsCompleteTrueOrderByTimeDesc();
 }

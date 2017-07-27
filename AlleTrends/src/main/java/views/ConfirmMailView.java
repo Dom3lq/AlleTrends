@@ -2,6 +2,7 @@ package views;
 
 import javax.annotation.PostConstruct;
 
+
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.VaadinSession;
@@ -19,8 +20,8 @@ import com.vaadin.ui.themes.ValoTheme;
 import components.MyMenuBar;
 import pojos.User;
 
-@SpringView(name = ConfirmMailView.NAME)
 @SuppressWarnings("serial")
+@SpringView(name = ConfirmMailView.NAME)
 public class ConfirmMailView extends VerticalLayout implements View {
 
 	public final static String NAME = "confirm-mail-view";

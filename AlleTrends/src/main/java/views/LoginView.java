@@ -13,7 +13,6 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -102,7 +101,7 @@ public class LoginView extends VerticalLayout implements View {
 									VaadinSession.getCurrent().setAttribute(Shop.class, shop);
 
 								if (user.getConfirmed())
-									UI.getCurrent().getNavigator().navigateTo(DashboardView.NAME);
+									UI.getCurrent().getNavigator().navigateTo(CategoriesView.NAME);
 								else
 									UI.getCurrent().getNavigator().navigateTo(ConfirmMailView.NAME);
 							} else

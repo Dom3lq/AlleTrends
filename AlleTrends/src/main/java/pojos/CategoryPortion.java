@@ -39,4 +39,8 @@ public class CategoryPortion {
 		this.endOffset = endOffset;
 	}
 
+	public long getSize() {
+		return this.getEndOffset() - this.getStartOffset();
+	}
+
 }

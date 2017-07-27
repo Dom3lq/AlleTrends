@@ -45,7 +45,7 @@ public class TrendsBot implements Runnable {
 	private final int threadsNumber = 100;
 	private final Boolean parsingKeywords = false;
 	private final Boolean parsingSellers = true;
-	private final Boolean parsingParameters = true;
+	private final Boolean parsingParameters = false;
 
 	@Autowired
 	private CategoryRepository categoryRepository;
@@ -93,12 +93,11 @@ public class TrendsBot implements Runnable {
 	private Map<String, ParameterValueRaport> parameterValueRaports;
 
 	private Raport raport;
+	private List<CategoryFailedPortion> categoryFailedPortions;
 
 	@Override
 	public void run() {
-		while (true)
-			saveInfo();
-
+		saveInfo();
 	}
 
 	private void saveInfo() {
@@ -112,6 +111,8 @@ public class TrendsBot implements Runnable {
 			getKeywords();
 		if (parsingParameters)
 			getParameters();
+
+		categoryFailedPortions = new ArrayList<CategoryFailedPortion>();
 
 		System.out.println("Getting categories");
 		Map<Integer, Category> categories = getCategories();
@@ -134,15 +135,38 @@ public class TrendsBot implements Runnable {
 		if (parsingParameters)
 			saveParameters();
 
+		this.categoryFailedPortionRepository.save(categoryFailedPortions);
+
 		completeRaport();
+	}
+
+	private Map<CategoryRaport, List<CategoryRaport>> getCategoryRaportsChildsMap(Map<Integer, Category> categories) {
+		Map<CategoryRaport, List<CategoryRaport>> categoryRaportsChilds = new HashMap<CategoryRaport, List<CategoryRaport>>();
+
+		categories.forEach((id, cat) -> {
+			CategoryRaport parent = categoryRaports.get(cat.getParent().getId());
+			CategoryRaport child = categoryRaports.get(id);
+
+			List<CategoryRaport> childs = categoryRaportsChilds.get(parent);
+
+			if (childs == null) {
+				childs = new ArrayList<CategoryRaport>();
+				categoryRaportsChilds.put(parent, childs);
+			}
+			childs.add(child);
+		});
+
+		return categoryRaportsChilds;
 	}
 
 	private void completeRaport() {
 		raport.setIsComplete(true);
 		raportRepository.save(raport);
 
-		System.out.println("Raport completed with efficienty of "
-				+ (raport.getActualSize() * 100 / raport.getTotalSize()) + " %.");
+		System.out
+				.println("Raport completed with efficienty of " + (raport.getActualSize() * 100 / raport.getTotalSize())
+						+ " % after " + ((getCurrentUnixTime() - raport.getTime()) / 60) + ":"
+						+ ((getCurrentUnixTime() - raport.getTime()) % 60));
 	}
 
 	private void joinThreads(List<Thread> threads) {
@@ -160,7 +184,9 @@ public class TrendsBot implements Runnable {
 	}
 
 	private List<Thread> portionCategoriesAndParseToThreads(Map<Integer, Category> categories) {
-		List<Integer> childsIds = getChildCategories(categories);
+		List<Integer> childsIds = getChildCategories(categories).keySet().stream().map(cks -> cks.intValue())
+				.collect(Collectors.toList());
+		;
 
 		ApiConnector ac = new ApiConnector();
 		List<Long[]> cats = new ArrayList<Long[]>();
@@ -222,7 +248,7 @@ public class TrendsBot implements Runnable {
 		return parsingThreads;
 	}
 
-	private List<Integer> getChildCategories(Map<Integer, Category> categories) {
+	private Map<Integer, Category> getChildCategories(Map<Integer, Category> categories) {
 		Map<Integer, Category> childs = new HashMap<Integer, Category>(categories);
 
 		for (Category c : categories.values()) {
@@ -231,7 +257,7 @@ public class TrendsBot implements Runnable {
 					childs.remove(c.getParent().getId());
 		}
 
-		return childs.keySet().stream().map(cks -> cks.intValue()).collect(Collectors.toList());
+		return childs;
 	}
 
 	private void saveCategoryRaports() {
@@ -260,6 +286,14 @@ public class TrendsBot implements Runnable {
 		CatInfoType[] apiCategories = ac.getCategories();
 		Map<Integer, Category> categories = new HashMap<Integer, Category>();
 
+		Category allegroCategory = categoryRepository.findOne(0);
+		if (allegroCategory == null) {
+			allegroCategory = new Category(0, "Allegro", 0);
+			categoryRepository.save(allegroCategory);
+		}
+
+		categories.put(0, allegroCategory);
+
 		for (CatInfoType apiCategory : apiCategories) {
 			Category category = categoryRepository.findOne(apiCategory.getCatId());
 
@@ -273,17 +307,17 @@ public class TrendsBot implements Runnable {
 
 		this.categoryRaports = new HashMap<Integer, CategoryRaport>();
 
+		CategoryRaport allegroCategoryRaport = new CategoryRaport(raport, allegroCategory);
+		this.categoryRaports.put(allegroCategoryRaport.getCategory().getId(), allegroCategoryRaport);
+
 		for (CatInfoType apiCategory : apiCategories) {
 
 			Category category = categories.get(apiCategory.getCatId());
 
-			if (apiCategory.getCatParent() != 0) {
-				Category parent = categories.get(apiCategory.getCatParent());
-				category.setParent(parent);
-				categories.put(apiCategory.getCatId(), category);
-				categoryRepository.save(category);
-			}
-
+			Category parent = categories.get(apiCategory.getCatParent());
+			category.setParent(parent);
+			categories.put(apiCategory.getCatId(), category);
+			categoryRepository.save(category);
 			CategoryRaport categoryRaport = new CategoryRaport(raport, category);
 
 			this.categoryRaports.put(categoryRaport.getCategory().getId(), categoryRaport);
@@ -337,7 +371,7 @@ public class TrendsBot implements Runnable {
 						.map(catRaport -> new CategoryFailedPortion(catRaport, startOffset, endOffset))
 						.collect(Collectors.toList());
 
-				this.categoryFailedPortionRepository.save(categoryRaportFailedPortions);
+				this.categoryFailedPortions.addAll(categoryRaportFailedPortions);
 			}
 		}
 		categoryRaportRepository.save(categoryAndParentsRaports);
@@ -351,11 +385,12 @@ public class TrendsBot implements Runnable {
 			}
 
 			if (parsingSellers)
-				parseSeller(spi, categoryAndParents.get(0));
+				parseSeller(spi, categoryAndParents);
 			if (parsingKeywords)
-				parseKeywords(spi, categoryAndParents.get(0));
+				parseKeywords(spi, categoryAndParents);
 			if (parsingParameters)
-				parseParameters(spi, categoryAndParents.get(0));
+				parseParameters(spi, categoryAndParents);
+
 		}
 
 		incrementCategoryRaportsProgress(categoryAndParents, items);
@@ -368,57 +403,59 @@ public class TrendsBot implements Runnable {
 		}
 	}
 
-	private void parseParameters(ItemsListType spi, CategoryRaport categoryRaport) {
-		if (spi.getParametersInfo() != null) {
-			Category cat = categoryRaport.getCategory();
-			for (ParameterInfoType param : spi.getParametersInfo()) {
-				String name = param.getParameterName();
-				String[] values = param.getParameterValue();
+	private void parseParameters(ItemsListType spi, List<CategoryRaport> categoryRaports) {
+		for (CategoryRaport categoryRaport : categoryRaports)
+			if (spi.getParametersInfo() != null) {
+				Category cat = categoryRaport.getCategory();
+				for (ParameterInfoType param : spi.getParametersInfo()) {
+					String name = param.getParameterName();
+					String[] values = param.getParameterValue();
 
-				ParameterName parameterName;
-				synchronized (parameterNames) {
-					parameterName = parameterNames.get(cat.getId() + name.toLowerCase());
+					ParameterName parameterName;
+					synchronized (parameterNames) {
+						parameterName = parameterNames.get(cat.getId() + name.toLowerCase());
 
-					if (parameterName == null) {
-						parameterName = new ParameterName();
-						parameterName.setName(name);
-						parameterName.setCategory(cat);
-						parameterNames.put(cat.getId() + name.toLowerCase(), parameterName);
-					}
-				}
-
-				for (String value : values) {
-
-					ParameterValue parameterValue;
-					synchronized (parameterValues) {
-						parameterValue = parameterValues.get(cat.getId() + name.toLowerCase() + value.toLowerCase());
-
-						if (parameterValue == null) {
-							parameterValue = new ParameterValue();
-							parameterValue.setName(value);
-							parameterValue.setParameterName(parameterName);
-							parameterValues.put(cat.getId() + name.toLowerCase() + value.toLowerCase(), parameterValue);
+						if (parameterName == null) {
+							parameterName = new ParameterName();
+							parameterName.setName(name);
+							parameterName.setCategory(cat);
+							parameterNames.put(cat.getId() + name.toLowerCase(), parameterName);
 						}
 					}
 
-					synchronized (parameterValueRaports) {
-						ParameterValueRaport parameterValueRaport = parameterValueRaports
-								.get(name + value + categoryRaport.getId());
+					for (String value : values) {
 
-						if (parameterValueRaport == null) {
-							parameterValueRaport = new ParameterValueRaport();
-							parameterValueRaport.setCategoryRaport(categoryRaport);
-							parameterValueRaport.setParameterValue(parameterValue);
+						ParameterValue parameterValue;
+						synchronized (parameterValues) {
+							parameterValue = parameterValues
+									.get(cat.getId() + name.toLowerCase() + value.toLowerCase());
+
+							if (parameterValue == null) {
+								parameterValue = new ParameterValue();
+								parameterValue.setName(value);
+								parameterValue.setParameterName(parameterName);
+								parameterValues.put(cat.getId() + name.toLowerCase() + value.toLowerCase(),
+										parameterValue);
+							}
+						}
+
+						ParameterValueRaport parameterValueRaport;
+						synchronized (parameterValueRaports) {
+							parameterValueRaport = parameterValueRaports.get(name + value + categoryRaport.getId());
+
+							if (parameterValueRaport == null) {
+								parameterValueRaport = new ParameterValueRaport();
+								parameterValueRaport.setCategoryRaport(categoryRaport);
+								parameterValueRaport.setParameterValue(parameterValue);
+								parameterValueRaports.put(cat.getId() + name + value + categoryRaport.getId(),
+										parameterValueRaport);
+							}
 						}
 						parameterValueRaport.incrementBy(spi);
 
-						parameterValueRaports.put(cat.getId() + name + value + categoryRaport.getId(),
-								parameterValueRaport);
 					}
-
 				}
 			}
-		}
 	}
 
 	private void incrementAndLogProgress(int length, long parsingTime) {
@@ -458,7 +495,7 @@ public class TrendsBot implements Runnable {
 		return System.currentTimeMillis() / 1000L;
 	}
 
-	private void parseKeywords(ItemsListType spi, CategoryRaport categoryRaport) {
+	private void parseKeywords(ItemsListType spi, List<CategoryRaport> categoryRaports) {
 		for (String word : spi.getItemTitle().split(" ")) {
 			word = word.toLowerCase().trim();
 			Keyword keyword;
@@ -471,23 +508,23 @@ public class TrendsBot implements Runnable {
 				}
 			}
 
-			KeywordRaport keywordRaport;
-			synchronized (keywordRaports) {
-				keywordRaport = keywordRaports.get(keyword.getWord() + categoryRaport.getId());
-				if (keywordRaport == null) {
-					keywordRaport = new KeywordRaport();
-					keywordRaport.setCategoryRaport(categoryRaport);
-					keywordRaport.setKeyword(keyword);
+			for (CategoryRaport categoryRaport : categoryRaports) {
+				KeywordRaport keywordRaport;
+				synchronized (keywordRaports) {
+					keywordRaport = keywordRaports.get(keyword.getWord() + categoryRaport.getId());
+					if (keywordRaport == null) {
+						keywordRaport = new KeywordRaport();
+						keywordRaport.setCategoryRaport(categoryRaport);
+						keywordRaport.setKeyword(keyword);
+						keywordRaports.put(keyword.getWord() + categoryRaport.getId(), keywordRaport);
+					}
 				}
-
 				keywordRaport.incrementBy(spi);
-
-				keywordRaports.put(keyword.getWord() + categoryRaport.getId(), keywordRaport);
 			}
 		}
 	}
 
-	private void parseSeller(ItemsListType spi, CategoryRaport categoryRaport) {
+	private void parseSeller(ItemsListType spi, List<CategoryRaport> categoryRaports) {
 		if (spi.getSellerInfo() != null) {
 			Seller seller;
 
@@ -501,19 +538,19 @@ public class TrendsBot implements Runnable {
 				}
 			}
 
-			SellerRaport sellerRaport;
-
-			synchronized (sellerRaports) {
-				sellerRaport = sellerRaports.get(seller.getName() + categoryRaport.getId());
-				if (sellerRaport == null) {
-					sellerRaport = new SellerRaport();
-					sellerRaport.setSeller(seller);
-					sellerRaport.setCategoryRaport(categoryRaport);
+			for (CategoryRaport categoryRaport : categoryRaports) {
+				SellerRaport sellerRaport;
+				synchronized (sellerRaports) {
+					sellerRaport = sellerRaports.get(seller.getName() + categoryRaport.getId());
+					if (sellerRaport == null) {
+						sellerRaport = new SellerRaport();
+						sellerRaport.setSeller(seller);
+						sellerRaport.setCategoryRaport(categoryRaport);
+						sellerRaports.put(seller.getName() + categoryRaport.getId(), sellerRaport);
+					}
 				}
 
 				sellerRaport.incrementBy(spi);
-
-				sellerRaports.put(seller.getName() + categoryRaport.getId(), sellerRaport);
 			}
 		}
 	}

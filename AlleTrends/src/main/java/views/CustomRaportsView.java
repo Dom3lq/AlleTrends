@@ -19,13 +19,13 @@ public class CustomRaportsView extends VerticalLayout implements View {
 
 	@Autowired
 	CustomRaportCreator customRaportCreator;
-	
+
 	@PostConstruct
 	public void init() {
 		this.setSizeFull();
 		this.setMargin(true);
 		this.setSpacing(true);
-		
+
 		this.addComponent(customRaportCreator);
 	}
 

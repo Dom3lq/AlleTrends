@@ -20,32 +20,29 @@ import com.vaadin.ui.themes.ValoTheme;
 import pojos.Category;
 import repositories.CategoryRepository;
 
-@SpringComponent
 @SuppressWarnings("serial")
 @ViewScope
+@SpringComponent
 public class CategoriesTreePanel extends Panel {
 
-	VerticalLayout categoriesLayout;
+	VerticalLayout content;
 	HorizontalLayout categoriesTreeLayout;
 	ListSelect<Category> categoriesListSelect;
 
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	private ContainingCategory containingCategory;
+	private ContainingCategoriesTreePanel containingCategoriesTreePanel;
 
 	@PostConstruct
 	public void init() {
-		categoriesLayout = new VerticalLayout();
-		categoriesLayout.setSizeFull();
+		content = new VerticalLayout();
+		content.setSizeFull();
 
 		categoriesTreeLayout = new HorizontalLayout();
 		categoriesTreeLayout.setStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
 		categoriesTreeLayout.setSpacing(false);
 		categoriesTreeLayout.setMargin(false);
-		categoriesTreeLayout.setWidth("100%");
-		categoriesTreeLayout.setHeightUndefined();
-		categoriesLayout.addComponent(categoriesTreeLayout);
 
 		categoriesListSelect = new ListSelect<Category>();
 		categoriesListSelect.setSizeFull();
@@ -57,26 +54,27 @@ public class CategoriesTreePanel extends Panel {
 			});
 		});
 
-		categoriesLayout.addComponent(categoriesListSelect);
-		categoriesLayout.setExpandRatio(categoriesListSelect, 1);
+		content.addComponent(categoriesTreeLayout);
+		content.addComponent(categoriesListSelect);
+		content.setExpandRatio(categoriesListSelect, 1);
 
-		updateCategoriesTreePanel(null);
+		updateCategoriesTreePanel(categoryRepository.findOne(0));
 
-		this.setContent(categoriesLayout);
+		this.setContent(content);
+		this.setIcon(VaadinIcons.LIST);
+		this.setCaption("Kategorie");
+		this.setSizeFull();
 	}
 
 	private void selectCategory(Category cat) {
-		containingCategory.selectCategory(cat);
+		containingCategoriesTreePanel.selectCategory(cat);
 	}
 
-	private void updateCategoriesTreePanel(Category parent) {
+	public void updateCategoriesTreePanel(Category parent) {
 		buildCategoriesTree(parent);
 
 		List<Category> categories;
-		if (parent != null)
-			categories = categoryRepository.findByParent(parent);
-		else
-			categories = categoryRepository.findByParentIsNull();
+		categories = categoryRepository.findByParent(parent);
 
 		if (categories.size() > 0) {
 			categoriesListSelect.setItems(categories);
@@ -102,26 +100,26 @@ public class CategoriesTreePanel extends Panel {
 			categoriesTreeLayout.addComponentAsFirst(catButton);
 		}
 
-		Button catButton = new Button();
-		catButton.setCaption("Allegro");
-		catButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
-		catButton.addClickListener(new Button.ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				updateCategoriesTreePanel(null);
-			}
-		});
-
-		categoriesTreeLayout.addComponentAsFirst(catButton);
+		// Button catButton = new Button();
+		// catButton.setCaption("Allegro");
+		// catButton.setStyleName(ValoTheme.BUTTON_BORDERLESS);
+		// catButton.addClickListener(new Button.ClickListener() {
+		// @Override
+		// public void buttonClick(ClickEvent event) {
+		// updateCategoriesTreePanel(null);
+		// }
+		// });
+		//
+		// categoriesTreeLayout.addComponentAsFirst(catButton);
 
 	}
 
-	public ContainingCategory getContainingCategory() {
-		return containingCategory;
+	public ContainingCategoriesTreePanel getContainingCategory() {
+		return containingCategoriesTreePanel;
 	}
 
-	public void setContainingCategory(ContainingCategory containingCategory) {
-		this.containingCategory = containingCategory;
+	public void setContainingCategory(ContainingCategoriesTreePanel containingCategory) {
+		this.containingCategoriesTreePanel = containingCategory;
 	}
 
 }
