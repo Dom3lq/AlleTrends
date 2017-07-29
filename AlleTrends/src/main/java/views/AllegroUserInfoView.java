@@ -38,9 +38,7 @@ public class AllegroUserInfoView extends VerticalLayout implements View {
 	private HorizontalLayout botHorizontalLayout, topHorizontalLayout;
 	private VerticalLayout topVerticalLayout;
 	private UserMainInfoPanel mainInfoPanel;
-
-	@Autowired
-	StatisticsPanel statisticsPanel;
+	private StatisticsPanel statisticsPanel;
 
 	@Autowired
 	SellerRaportRepository sellerRaportRepository;
@@ -103,6 +101,8 @@ public class AllegroUserInfoView extends VerticalLayout implements View {
 		searchUserLayout.addComponent(searchUserB);
 
 		mainInfoPanel = new UserMainInfoPanel();
+
+		statisticsPanel = new StatisticsPanel();
 
 		botHorizontalLayout = new HorizontalLayout();
 		botHorizontalLayout.setSizeFull();

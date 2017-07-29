@@ -2,6 +2,7 @@ package alle.trends;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.View;
 import com.vaadin.server.Responsive;
@@ -28,6 +29,7 @@ import com.vaadin.ui.Panel;
 @SuppressWarnings("serial")
 @SpringUI
 @Theme("valo")
+@Push
 public class TradelyzerUI extends UI {
 
 	private VerticalLayout root;
@@ -36,6 +38,7 @@ public class TradelyzerUI extends UI {
 
 	@Autowired
 	SpringViewProvider viewProvider;
+
 	@Autowired
 	private SpringNavigator navi;
 

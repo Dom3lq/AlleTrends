@@ -56,7 +56,7 @@ public class StatisticsCell extends VerticalLayout {
 			valueGrowthLabel.setVisible(true);
 			valueGrowthLabel.setContentMode(ContentMode.HTML);
 			if (valueGrowth < 0) {
-				valueGrowthLabel.setValue(VaadinIcons.TRENDIND_DOWN.getHtml() + " <font color=\"red\">-"
+				valueGrowthLabel.setValue(VaadinIcons.TRENDIND_DOWN.getHtml() + " <font color=\"red\">"
 						+ String.valueOf(valueGrowth) + "%</font>");
 			} else if (valueGrowth > 0) {
 				valueGrowthLabel.setValue(VaadinIcons.TRENDING_UP.getHtml() + " <font color=\"green\">+"
@@ -76,7 +76,7 @@ public class StatisticsCell extends VerticalLayout {
 				partGrowthLabel.setVisible(true);
 				partGrowthLabel.setContentMode(ContentMode.HTML);
 				if (partGrowth < 0) {
-					partGrowthLabel.setValue(VaadinIcons.TRENDIND_DOWN.getHtml() + " <font color=\"red\">-"
+					partGrowthLabel.setValue(VaadinIcons.TRENDIND_DOWN.getHtml() + " <font color=\"red\">"
 							+ String.valueOf(partGrowth) + "%</font>");
 				} else if (partGrowth > 0) {
 					partGrowthLabel.setValue(VaadinIcons.TRENDING_UP.getHtml() + " <font color=\"green\">+"

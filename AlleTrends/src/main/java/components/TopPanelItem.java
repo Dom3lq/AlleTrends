@@ -1,6 +1,7 @@
 package components;
 
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -27,6 +28,7 @@ public class TopPanelItem extends VerticalLayout {
 		changeLabel = new Label();
 		changeLabel.setStyleName(ValoTheme.LABEL_COLORED);
 		changeLabel.setVisible(false);
+		changeLabel.setContentMode(ContentMode.HTML);
 
 		this.addComponents(nameLabel, additionalInfoLabel, valueLabel, changeLabel);
 		this.setSizeUndefined();
@@ -48,6 +50,13 @@ public class TopPanelItem extends VerticalLayout {
 		return this;
 	}
 
+	public TopPanelItem setValue(long value, String info) {
+		valueLabel.setValue(String.format("%,8d", value) + " " + info);
+		valueLabel.setVisible(true);
+
+		return this;
+	}
+
 	public TopPanelItem setValue(long value) {
 		valueLabel.setValue(String.format("%,8d", value));
 		valueLabel.setVisible(true);
@@ -57,15 +66,16 @@ public class TopPanelItem extends VerticalLayout {
 
 	public TopPanelItem setChange(long change) {
 		if (change > 0) {
-			changeLabel.setValue("<font color=\"green\">" + String.valueOf(change) + "</font>");
-			changeLabel.setIcon(VaadinIcons.TRENDING_UP);
+			changeLabel.setValue(
+					VaadinIcons.TRENDING_UP.getHtml() + " <font color=\"green\">+" + String.valueOf(change) + "%</font>");
 		} else if (change < 0) {
-			changeLabel.setIcon(VaadinIcons.TRENDIND_DOWN);
-			changeLabel.setValue("<font color=\"red\">" + String.valueOf(change) + "</font>");
+			changeLabel.setValue(
+					VaadinIcons.TRENDIND_DOWN.getHtml() + " <font color=\"red\">" + String.valueOf(change)
+							+ "%</font>");
 
 		} else {
-			changeLabel.setIcon(VaadinIcons.ARROWS_LONG_RIGHT);
-			changeLabel.setValue("<font color=\"yellow\">" + String.valueOf(change) + "</font>");
+			changeLabel.setValue(VaadinIcons.ARROWS_LONG_RIGHT.getHtml() + " <font color=\"yellow\">"
+					+ String.valueOf(change) + "%</font>");
 		}
 		changeLabel.setVisible(true);
 

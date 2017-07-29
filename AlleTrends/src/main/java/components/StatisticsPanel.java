@@ -2,12 +2,8 @@ package components;
 
 import java.util.Arrays;
 
-import javax.annotation.PostConstruct;
-
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.spring.annotation.SpringComponent;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -17,8 +13,6 @@ import com.vaadin.ui.themes.ValoTheme;
 import pojos.Statistics;
 
 @SuppressWarnings("serial")
-@ViewScope
-@SpringComponent
 public class StatisticsPanel extends Panel {
 
 	StatisticsRow allRow, newRow, usedRow, undefinedRow, freeDeliveryRow, allegroStandardRow;
@@ -26,8 +20,7 @@ public class StatisticsPanel extends Panel {
 	VerticalLayout informationLayout;
 	Label headLabel;
 
-	@PostConstruct
-	public void init() {
+	public StatisticsPanel() {
 		informationLayout = new VerticalLayout();
 		informationLayout.setHeight("100%");
 		informationLayout.setWidthUndefined();

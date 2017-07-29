@@ -9,10 +9,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 
-import com.vaadin.data.HasValue.ValueChangeEvent;
-import com.vaadin.data.HasValue.ValueChangeListener;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -28,8 +25,6 @@ import com.vaadin.ui.themes.ValoTheme;
 import components.CategoriesTreePanel;
 import components.ContainingCategoriesTreePanel;
 import components.StatisticsPanel;
-
-import com.vaadin.ui.ComboBox;
 
 import pojos.Category;
 import pojos.CategoryRaport;
@@ -55,14 +50,12 @@ public class CategoriesView extends VerticalLayout implements View, ContainingCa
 	CategoryRepository categoryRepository;
 
 	@Autowired
-	StatisticsPanel statisticsPanel;
-
-	@Autowired
 	CategoriesTreePanel categoriesTreePanel;
 
 	List<Raport> raports;
 	Raport selectedRaport;
 
+	StatisticsPanel statisticsPanel;
 	Panel topPanel, botPanel, keyWordsPanel, sellersPanel;
 	HorizontalLayout botLayout, headerLayout;
 
@@ -87,6 +80,8 @@ public class CategoriesView extends VerticalLayout implements View, ContainingCa
 		botLayout.setMargin(true);
 		botLayout.setSpacing(true);
 		botPanel.setContent(botLayout);
+
+		statisticsPanel = new StatisticsPanel();
 
 		botLayout.addComponent(categoriesTreePanel);
 		botLayout.addComponent(statisticsPanel);
@@ -129,38 +124,6 @@ public class CategoriesView extends VerticalLayout implements View, ContainingCa
 
 		headerLayout.addComponent(raportInfoLabel);
 		headerLayout.setComponentAlignment(raportInfoLabel, Alignment.MIDDLE_RIGHT);
-	}
-
-	private void buildRaportSelector() {
-		this.raports = raportRepository.findByIsCompleteTrueOrderByTimeDesc();
-
-		ComboBox<Raport> raportBox = new ComboBox<>("Data");
-		raportBox.setEnabled(false);
-		raportBox.setIcon(VaadinIcons.CALENDAR_CLOCK);
-		raportBox.setStyleName(ValoTheme.COMBOBOX_BORDERLESS);
-		raportBox.setSizeUndefined();
-		raportBox.setItems(this.raports);
-		raportBox.setItemCaptionGenerator(r -> {
-			LocalDateTime date = Instant.ofEpochMilli(r.getTime() * 1000).atZone(ZoneId.systemDefault())
-					.toLocalDateTime();
-			LocalDateTime fromDate = date.minusMonths(2);
-			DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-			return fromDate.format(format) + " - " + date.format(format);
-		});
-
-		raportBox.addValueChangeListener(new ValueChangeListener<Raport>() {
-
-			@Override
-			public void valueChange(ValueChangeEvent<Raport> event) {
-				selectedRaport = event.getValue();
-			}
-		});
-
-		headerLayout.addComponent(raportBox);
-		headerLayout.setComponentAlignment(raportBox, Alignment.MIDDLE_RIGHT);
-
-		if (raports.size() > 0)
-			raportBox.setSelectedItem(this.raports.get(0));
 	}
 
 	@Override
